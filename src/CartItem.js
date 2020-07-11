@@ -1,46 +1,13 @@
 import React from 'react';
 
 class CartItem extends React.Component {
-    constructor () {
-        super();
-        this.state = {
-            price: 999,
-            title: 'Phone',
-            qty: 1,
-            img: ''
-        }
-    }
-    increaseQuantity = () => {
-        // this.state.qty++;
-        // console.log(this.state.qty);
-        // setState form 1
-        // this.setState({
-        //     qty: this.state.qty + 1
-        // });
-
-        // setState form 2 - if prevState required
-        this.setState((prevState) =>{
-            return {
-                qty: prevState.qty + 1
-            }
-        });
-    }
-
-    decreaseQuantity = () => {
-        const { qty} = this.state;
-
-        if (qty === 0){
-            return;
-        }
-        
-        this.setState((prevState) =>{
-            return {
-                qty: prevState.qty - 1
-            }
-        });
-    }
     render () {
-        const { price, title, qty} = this.state;
+        const { price, title, qty} = this.props.product;
+        const { product, 
+            onIncreaseQuantity, 
+            onDecreaseQuantity,
+            onDeleteProduct
+        } = this.props;
         return(
             <div className="cart-item">
                 <div className="left-block">
@@ -56,18 +23,19 @@ class CartItem extends React.Component {
                             alt="increase" 
                             className= "action-icons" 
                             src="https://image.flaticon.com/icons/svg/992/992651.svg" 
-                            onClick= {this.increaseQuantity}    
+                            onClick= {() => onIncreaseQuantity(product)}    
                         />
                         <img 
                             alt="decrease" 
                             className= "action-icons" 
                             src="https://image.flaticon.com/icons/svg/992/992683.svg" 
-                            onClick= {this.decreaseQuantity} 
+                            onClick= {() => onDecreaseQuantity(product)} 
                         />
                         <img 
                             alt="delete" 
                             className= "action-icons" 
                             src="https://image.flaticon.com/icons/svg/1345/1345874.svg" 
+                            onClick= {() => onDeleteProduct(product.id)} 
                         />
                     </div>
                 </div>
