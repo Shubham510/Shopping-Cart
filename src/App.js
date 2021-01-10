@@ -1,46 +1,76 @@
 import React from 'react';
 import Navbar from './Navbar';
 import Cart from './Cart';
+import * as firebase from 'firebase'
 
 class App extends React.Component {
   constructor () {
     super();
     this.state = {
-        products: [
-            {
-                id: 2,
-                price: 999,
-                title: 'Phone',
-                qty: 1,
-                img: 'https://images.unsplash.com/photo-1525598912003-663126343e1f?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1050&q=80'
-            },
-            {
-                id: 4,
-                price: 99,
-                title: 'Watch',
-                qty: 2,
-                img: 'https://images.unsplash.com/photo-1524805444758-089113d48a6d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=634&q=80'
-            },
-            {
-                id: 6,
-                price: 99999,
-                title: 'Laptop',
-                qty: 1,
-                img: 'https://images.unsplash.com/photo-1525547719571-a2d4ac8945e2?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=700&q=80'
-            }
-        ]
-        
+        products: []
     }
+    this.db= firebase.firestore();
+  }
+
+  componentDidMount () {
+    // firebase
+    //   .firestore()
+    //   .collection('products')
+    //   .get()
+    //   .then((snapshot) => {
+
+
+    //     const products = snapshot.docs.map((doc) => {
+    //       const data = doc.data();
+    //       data['id'] = doc.id;
+    //       return data;
+    //     })
+
+    //     this.setState({
+    //       products
+    //     })
+    //   })
+
+    this.db
+      .collection('products')
+      //.where('price','==',9999)
+      .orderBy('price','desc')
+      .onSnapshot((snapshot) => {
+
+
+        const products = snapshot.docs.map((doc) => {
+          const data = doc.data();
+          data['id'] = doc.id;
+          return data;
+        })
+
+        this.setState({
+          products
+        })
+      })
   }
   handleIncreaseQuantity = (product) => {
       const {products} = this.state;
       const index = products.indexOf(product);
 
-      products[index].qty++;
+      // products[index].qty++;
 
-      this.setState({
-          products
-      })
+      // this.setState({
+      //     products
+      // })
+
+      const docRef = this.db.collection('products').doc(products[index].id);
+
+      docRef
+        .update({
+          qty: products[index].qty + 1
+        })
+        .then(() =>{
+          console.log('Updated Successfully')
+        })
+        .catch((error) => {
+          console.log('Error: ', error);
+        })
   }
   handleDecreaseQuantity = (product) => {
       const {products} = this.state;
@@ -50,20 +80,44 @@ class App extends React.Component {
       {
           return;
       }
-      products[index].qty--;
+      // products[index].qty--;
 
-      this.setState({
-          products
-      })
+      // this.setState({
+      //     products
+      // })
+
+      const docRef = this.db.collection('products').doc(products[index].id);
+
+      docRef
+        .update({
+          qty: products[index].qty - 1
+        })
+        .then(() =>{
+          console.log('Updated Successfully')
+        })
+        .catch((error) => {
+          console.log('Error: ', error);
+        })
   }
   handleDeleteProduct = (id) => {
       const {products} = this.state;
 
-      const items = products.filter((item) => item.id !== id);
+      // const items = products.filter((item) => item.id !== id);
 
-      this.setState({
-          products: items
-      })
+      // this.setState({
+      //     products: items
+      // }).
+
+      const docRef = this.db.collection('products').doc(id);
+
+      docRef
+        .delete()
+        .then(() =>{
+          console.log('Updated Successfully')
+        })
+        .catch((error) => {
+          console.log('Error: ', error);
+        })
   }
 
   getCartCount = () => {
@@ -88,11 +142,30 @@ class App extends React.Component {
     })
     return cartTotal;
   }
+
+  addProduct = () => {
+    this.db
+      .collection('products')
+      .add({
+        img:'',
+        price: 14999,
+        qty: 3,
+        title: 'Wasing Machine'
+      })
+      .then((docRef) => {
+        console.log('Product has been added', docRef);
+      })
+      .catch((error) => {
+        console.log('Error : ', error);
+      })
+  }
+
   render () {
     const {products} = this.state;
     return (
       <div className="App">
         <Navbar count={this.getCartCount()} />
+        {/* <button onClick={this.addProduct}>Add a Product</button> */}
         <Cart 
           products={products}
           onIncreaseQuantity = {this.handleIncreaseQuantity}
